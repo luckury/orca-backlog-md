@@ -6,7 +6,7 @@
 An [Orca](https://github.com/stablyai/orca) plugin that makes [Backlog.md](https://github.com/MrLesk/Backlog.md) a task source. Like GitHub, GitLab, Jira and Linear, it gets its own tab on the Tasks page. You can browse and filter the tasks of all your Backlog.md projects there, read a task in full, and start a workspace for it with the agent prompt already written.
 
 > [!IMPORTANT]
-> **Experimental: this plugin needs an Orca with plugin task sources.** It uses the `taskSources` contribution point from [stablyai/orca#26282](https://github.com/stablyai/orca/pull/26282), which is not merged yet. Released Orca (1.4.240 and older) rejects the manifest. Until the PR lands, run an Orca build of that branch. If the contract changes before it merges, this plugin will follow it.
+> **Experimental: this plugin needs an Orca with plugin task sources.** It uses the `taskSources` contribution point from [stablyai/orca#26282](https://github.com/stablyai/orca/pull/26282), which is not merged yet. Released Orca (1.4.240 and older) rejects the manifest. Until the PR lands, build Orca from that branch: see [Building Orca with task sources](#building-orca-with-task-sources). It runs next to your installed Orca without touching its data. If the contract changes before the PR merges, this plugin will follow it.
 
 ![The Backlog.md tab on Orca's Tasks page, listing open tasks of three projects](docs/tasks-tab.png)
 
@@ -16,7 +16,7 @@ An [Orca](https://github.com/stablyai/orca) plugin that makes [Backlog.md](https
 
 ## Quickstart
 
-1. In Orca, open **Settings › Plugins › Install plugin › Git URL** and enter `https://github.com/luckury/orca-backlog-md.git`, ref `main`. There is no release tag yet; one follows when Orca ships task sources. You can also add this repository as a marketplace source; it carries its own `orca-marketplace.json`.
+1. In an [Orca with task sources](#building-orca-with-task-sources), turn on **Plugin system** under **Settings › Plugins**. Then open **Install plugin › Git URL** and enter `https://github.com/luckury/orca-backlog-md.git`, ref `main`. There is no release tag yet; one follows when Orca ships task sources. You can also add this repository as a marketplace source; it carries its own `orca-marketplace.json`.
 2. Approve the two capabilities it asks for: adding a task list to the Tasks page, and reading its own settings.
 3. Open the plugin's **Settings** and put your project folders under **Project folders**, one per line, for example `~/Projects`.
 4. Open **Tasks** and pick the **Backlog.md** tab.
@@ -24,6 +24,27 @@ An [Orca](https://github.com/stablyai/orca) plugin that makes [Backlog.md](https
 Pick a task and press **Start workspace**. Orca opens Create workspace with the project, a workspace name such as `task-12-fix-the-login-form`, and an agent prompt filled in. You review it there; nothing is created until you confirm.
 
 **Start needs the project in Orca.** The folder that holds the task's `backlog/` has to be added to Orca as a project. If it is not, Orca says *No Orca project is at …* and you add it with **Projects › +**.
+
+## Building Orca with task sources
+
+Until [stablyai/orca#26282](https://github.com/stablyai/orca/pull/26282) is merged, no released Orca can load this plugin. Build the PR's branch instead. You need Git, Node 24 and pnpm 12.14.0; with [mise](https://mise.jdx.dev) the commands below fetch Node and pnpm for you. Last checked on Linux with the branch at `4396d9344` (2026-10-27).
+
+```sh
+git clone --branch plugin-task-sources https://github.com/ggrafhalfbrick/orca.git orca-task-sources
+cd orca-task-sources
+mise x node@24 pnpm@12.14.0 -- sh -c 'pnpm install --frozen-lockfile && pnpm run build:electron-vite'
+```
+
+Start it from that folder:
+
+```sh
+ORCA_DEV_USER_DATA_PATH=~/.config/orca-task-sources mise x node@24 pnpm@12.14.0 -- pnpm exec electron .
+```
+
+- **It stays apart from your installed Orca.** Orca treats an unpackaged build as a development instance: it keeps its profile in `ORCA_DEV_USER_DATA_PATH` and picks its own ports, so both can run at once. Without the variable it uses the profile `orca-dev`.
+- **Ubuntu 24.04 and later:** add `--no-sandbox` after `electron`, as the Orca AppImage does. AppArmor denies user namespaces to an Electron it does not know, and Chromium then aborts with *The SUID sandbox helper binary was found, but is not configured correctly*. An AppArmor profile that allows `userns` for that binary keeps the sandbox on instead.
+- **A launcher of its own (Linux):** with `"desktopName": "orca-task-sources.desktop"` added to the checkout's `package.json` and a matching `.desktop` file, the dock shows it apart from the installed Orca. Electron takes the Wayland app id from `desktopName` and ignores `CHROME_DESKTOP`.
+- **Updating:** `git pull`, then the `pnpm install … build:electron-vite` line again.
 
 ## What you see
 
