@@ -38,6 +38,22 @@ preview +folders: build
     docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "{{justfile_directory()}}:/work:ro" -w /work "${mounts[@]}" {{node}} \
       node scripts/preview.mjs $(for f in {{folders}}; do realpath "$f"; done)
 
+# Host only: Electron needs a display, so this runs on Xvfb (xvfb-run) instead of a container.
+# Run the plugin inside Orca, e.g. `just e2e ../orca` (a PR #26282 checkout after `pnpm install`)
+e2e orca:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    orca=$(realpath "{{orca}}")
+    shots="{{justfile_directory()}}/test/e2e/screenshots"
+    mkdir -p "$shots"
+    cp "{{justfile_directory()}}/test/e2e/backlog-md-plugin.spec.ts" "$orca/tests/e2e/"
+    cd "$orca"
+    env -u WAYLAND_DISPLAY -u DISPLAY ORCA_E2E_FORCE_HEADFUL=1 \
+      BACKLOG_PLUGIN_REPO="{{justfile_directory()}}" BACKLOG_PLUGIN_SHOTS="$shots" \
+      xvfb-run -a -s "-screen 0 1920x1080x24" mise x node@24 pnpm@12.14.0 -- \
+      npx playwright test tests/e2e/backlog-md-plugin.spec.ts --config tests/playwright.config.ts \
+      --project=electron-headless --workers=1 --reporter=line
+
 # Re-vendor Orca's task-source contract from a commit of the upstream PR
 vendor-contract commit:
     scripts/vendor-contract.sh {{commit}}
