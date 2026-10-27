@@ -95,7 +95,7 @@ To load a working copy in Orca, add the repository folder under **Settings › P
 
 **Contract tests.** `test/contract/` holds Orca's own task-source and settings schemas, copied from PR #26282. The tests run the bundled worker through them in the same way Orca does, and they fail when the plugin's output drifts from the contract. When the PR changes, refresh them with `just vendor-contract <commit>`.
 
-**Inside Orca.** `test/e2e/backlog-md-plugin.spec.ts` is an Orca Playwright spec. It installs the plugin from a local path, approves it, sets the folders, checks the list, the filters, the detail sheet and Start, and saves screenshots to `test/e2e/screenshots/`. It needs a checkout of PR #26282 after `pnpm install`; `just e2e <checkout>` copies the spec there and runs it. This one runs on the host, not in the container, because Electron needs a display: it uses a virtual one from `xvfb-run`.
+**Inside Orca.** `test/e2e/backlog-md-plugin.spec.ts` is an Orca Playwright spec. It installs the plugin from a local path, approves it, sets the folders, checks the list, the filters, the detail sheet and Start, and saves screenshots to `test/e2e/screenshots/`. It needs a checkout of PR #26282 after `pnpm install`; `just e2e <checkout>` copies the spec there and runs it, and `just e2e <checkout> main` installs the plugin from GitHub at that ref instead, the way users do. This one runs on the host, not in the container, because Electron needs a display: it uses a virtual one from `xvfb-run`.
 
 **Releases.** Until Orca ships task sources there are no tags, and `orca-marketplace.json` points at `main`. After that:
 1. Bump `version` in `orca-plugin.json` and `package.json`.

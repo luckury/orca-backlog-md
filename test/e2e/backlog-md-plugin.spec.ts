@@ -1,6 +1,8 @@
 // Runs the plugin inside a real Orca build that has task sources. It is an Orca
 // Playwright spec, so `just e2e <orca checkout>` copies it into that checkout's
 // tests/e2e/ and runs it there. Screenshots land in BACKLOG_PLUGIN_SHOTS.
+// With BACKLOG_PLUGIN_GIT_REF set, it installs that ref from GitHub instead of
+// the working copy, the way users install it.
 
 import { execFileSync } from 'node:child_process'
 import { cp, mkdir, mkdtemp, rm } from 'node:fs/promises'
@@ -11,6 +13,8 @@ import { expect, test } from './helpers/orca-app'
 
 const PLUGIN_REPO = process.env.BACKLOG_PLUGIN_REPO!
 const SHOTS = process.env.BACKLOG_PLUGIN_SHOTS!
+const GIT_REF = process.env.BACKLOG_PLUGIN_GIT_REF
+const GIT_URL = 'https://github.com/luckury/orca-backlog-md.git'
 
 async function settle(page: Page): Promise<void> {
   await page.evaluate(() =>
@@ -58,16 +62,19 @@ test('Backlog.md plugin end to end', async ({ orcaPage: page, electronApp }) => 
     const projects = join(tempRoot, 'projects')
     await cp(join(PLUGIN_REPO, 'test', 'fixtures', 'workspace'), projects, { recursive: true })
 
-    const pluginKey = await page.evaluate(async (sourcePath) => {
+    const source = GIT_REF
+      ? ({ kind: 'git', url: GIT_URL, ref: GIT_REF } as const)
+      : ({ kind: 'local-path', path: pluginRoot } as const)
+    const pluginKey = await page.evaluate(async (request) => {
       const settings = await window.api.settings.set({ pluginSystemEnabled: true })
       window.__store?.setState({ settings })
-      const result = await window.api.plugins.install({ kind: 'local-path', path: sourcePath })
+      const result = await window.api.plugins.install(request)
       if (!result.ok) {
         throw new Error(result.error)
       }
       await window.api.plugins.refresh()
       return result.pluginKey
-    }, pluginRoot)
+    }, source)
     expect(pluginKey).toBe('luckury.backlog-md')
 
     let row = await openPluginSettings(page, pluginKey)
