@@ -1,9 +1,10 @@
 ---
 id: TASK-3
-title: Publish the plugin repository and v0.1.0 release
+title: Publish the plugin repository
 status: To Do
 assignee: []
 created_date: '2026-10-26 15:24'
+updated_date: '2026-10-27 07:47'
 labels:
   - release
 dependencies: []
@@ -20,6 +21,11 @@ The repository exists only locally. Publishing makes it installable from Orca vi
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 github.com/luckury/orca-backlog-md exists, main is pushed and CI is green
-- [ ] #2 Tag v0.1.0 points at a commit whose dist/main.mjs matches src/
-- [ ] #3 Installing from the Git URL at v0.1.0 works in an Orca build with task sources
+- [ ] #2 Installing from the Git URL at ref main works in an Orca build with task sources
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+No release tag for now (decided 2026-10-27): the plugin depends on the unmerged taskSources API, so orca-marketplace.json and the README point at main. Tag v0.1.0 as part of TASK-2 once Orca ships task sources.
+<!-- SECTION:NOTES:END -->

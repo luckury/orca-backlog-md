@@ -4,6 +4,7 @@ title: Follow the taskSources contract until it is merged
 status: To Do
 assignee: []
 created_date: '2026-10-26 15:24'
+updated_date: '2026-10-27 07:47'
 labels:
   - upstream
 dependencies: []
@@ -26,4 +27,5 @@ The plugin targets the experimental taskSources contract of stablyai/orca#26282.
 - [ ] #1 test/contract matches the merged contract (just vendor-contract <commit>) and just ci passes
 - [ ] #2 engines.orca names the first Orca release that ships task sources
 - [ ] #3 The README experimental notice is removed or updated
+- [ ] #4 Tag v0.1.0 once a released Orca has task sources, and point orca-marketplace.json and the README at it
 <!-- AC:END -->
