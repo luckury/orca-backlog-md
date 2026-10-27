@@ -1,6 +1,6 @@
 # Backlog.md for Orca
 
-[![version](https://img.shields.io/github/v/tag/luckury/orca-backlog-md?label=version)](https://github.com/luckury/orca-backlog-md/tags)
+[![version](https://img.shields.io/github/package-json/v/luckury/orca-backlog-md?label=version)](orca-plugin.json)
 [![ci](https://github.com/luckury/orca-backlog-md/actions/workflows/ci.yml/badge.svg)](https://github.com/luckury/orca-backlog-md/actions/workflows/ci.yml)
 
 An [Orca](https://github.com/stablyai/orca) plugin that makes [Backlog.md](https://github.com/MrLesk/Backlog.md) a task source. Like GitHub, GitLab, Jira and Linear, it gets its own tab on the Tasks page. You can browse and filter the tasks of all your Backlog.md projects there, read a task in full, and start a workspace for it with the agent prompt already written.
@@ -8,18 +8,22 @@ An [Orca](https://github.com/stablyai/orca) plugin that makes [Backlog.md](https
 > [!IMPORTANT]
 > **Experimental: this plugin needs an Orca with plugin task sources.** It uses the `taskSources` contribution point from [stablyai/orca#26282](https://github.com/stablyai/orca/pull/26282), which is not merged yet. Released Orca (1.4.240 and older) rejects the manifest. Until the PR lands, run an Orca build of that branch. If the contract changes before it merges, this plugin will follow it.
 
-_Screenshot: to follow once it has been captured in an Orca build with task sources._
+![The Backlog.md tab on Orca's Tasks page, listing open tasks of three projects](docs/tasks-tab.png)
+
+![The detail sheet of a task, with its metadata, description and acceptance criteria](docs/task-detail.png)
 
 ---
 
 ## Quickstart
 
-1. In Orca, open **Settings › Plugins › Install plugin › Git URL** and enter `https://github.com/luckury/orca-backlog-md.git`, ref `v0.1.0`. You can also add this repository as a marketplace source; it carries its own `orca-marketplace.json`.
+1. In Orca, open **Settings › Plugins › Install plugin › Git URL** and enter `https://github.com/luckury/orca-backlog-md.git`, ref `main`. There is no release tag yet; one follows when Orca ships task sources. You can also add this repository as a marketplace source; it carries its own `orca-marketplace.json`.
 2. Approve the two capabilities it asks for: adding a task list to the Tasks page, and reading its own settings.
 3. Open the plugin's **Settings** and put your project folders under **Project folders**, one per line, for example `~/Projects`.
 4. Open **Tasks** and pick the **Backlog.md** tab.
 
-Pick a task and press **Start**. Orca opens Create workspace with the project, a workspace name such as `task-12-fix-the-login-form`, and an agent prompt filled in. You review it there; nothing is created until you confirm.
+Pick a task and press **Start workspace**. Orca opens Create workspace with the project, a workspace name such as `task-12-fix-the-login-form`, and an agent prompt filled in. You review it there; nothing is created until you confirm.
+
+**Start needs the project in Orca.** The folder that holds the task's `backlog/` has to be added to Orca as a project. If it is not, Orca says *No Orca project is at …* and you add it with **Projects › +**.
 
 ## What you see
 
@@ -84,18 +88,21 @@ Everything runs in a pinned `node:24-alpine` container through [`just`](https://
 just test            # install, bundle src/ into dist/main.mjs, run unit and contract tests
 just preview ~/Projects   # print what the source returns for real folders, read-only
 just ci              # what CI runs: tests, then check that dist/ is committed and current
+just e2e ../orca     # run the plugin inside an Orca build, see below
 ```
 
 To load a working copy in Orca, add the repository folder under **Settings › Plugins › Development**. Run `just build` after each change, because Orca loads `dist/main.mjs`.
 
 **Contract tests.** `test/contract/` holds Orca's own task-source and settings schemas, copied from PR #26282. The tests run the bundled worker through them in the same way Orca does, and they fail when the plugin's output drifts from the contract. When the PR changes, refresh them with `just vendor-contract <commit>`.
 
-**Releases.**
+**Inside Orca.** `test/e2e/backlog-md-plugin.spec.ts` is an Orca Playwright spec. It installs the plugin from a local path, approves it, sets the folders, checks the list, the filters, the detail sheet and Start, and saves screenshots to `test/e2e/screenshots/`. It needs a checkout of PR #26282 after `pnpm install`; `just e2e <checkout>` copies the spec there and runs it. This one runs on the host, not in the container, because Electron needs a display: it uses a virtual one from `xvfb-run`.
+
+**Releases.** Until Orca ships task sources there are no tags, and `orca-marketplace.json` points at `main`. After that:
 1. Bump `version` in `orca-plugin.json` and `package.json`.
 2. Run `just ci` and commit, including `dist/`.
-3. Tag `vX.Y.Z` and update `ref` in `orca-marketplace.json`.
+3. Tag `vX.Y.Z` and set `ref` in `orca-marketplace.json` to it.
 
-Orca installs from the Git tag, so the bundle has to be in the repository.
+Orca installs from Git without building anything, so the bundle has to be in the repository.
 
 Open work is tracked with Backlog.md in `backlog/` (`backlog board`).
 
