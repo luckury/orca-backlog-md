@@ -1,0 +1,22 @@
+{
+  "name": "orca-backlog-md",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backlog.md task source plugin for Orca",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test 'test/**/*.test.mjs'"
+  },
+  "dependencies": {
+    "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "zod": "4.6.7"
+  }
+}

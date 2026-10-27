@@ -1,0 +1,3 @@
+# Host tools for the dev loop. Node itself runs in the pinned container (see justfile).
+[tools]
+just = "1.58.0"

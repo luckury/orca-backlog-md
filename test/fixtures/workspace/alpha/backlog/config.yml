@@ -1,0 +1,6 @@
+project_name: "Alpha"
+default_status: "To Do"
+statuses: ["To Do", "In Progress", "In Review", "Done"]
+priorities: [high, medium, low]
+labels: []
+task_prefix: "task"

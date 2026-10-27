@@ -1,0 +1,34 @@
+{
+  "manifestVersion": 1,
+  "id": "backlog-md",
+  "publisher": "luckury",
+  "name": "Backlog.md",
+  "version": "0.1.0",
+  "description": "Backlog.md as a task source: lists the tasks of your Backlog.md projects on the Tasks page and starts a workspace for any of them.",
+  "author": { "name": "Luc Kury", "url": "https://github.com/luckury" },
+  "repository": "https://github.com/luckury/orca-backlog-md",
+  "engines": { "orca": ">=1.4.214" },
+  "pluginApi": 1,
+  "main": "dist/main.mjs",
+  "contributes": {
+    "taskSources": [{ "id": "backlog", "title": "Backlog.md", "icon": "list-todo" }],
+    "settings": [
+      {
+        "key": "folders",
+        "title": "Project folders",
+        "description": "One folder per line. Each is either a project with a backlog/ folder, or a parent folder searched three levels deep for such projects. ~ means your home folder.",
+        "type": "string",
+        "multiline": true,
+        "placeholder": "~/Projects"
+      },
+      {
+        "key": "agentPrompt",
+        "title": "Agent prompt",
+        "description": "Draft typed into the agent when you start a task. Placeholders: {id}, {title}, {status}, {file}, {project}. Leave empty for the built-in prompt.",
+        "type": "string",
+        "multiline": true
+      }
+    ]
+  },
+  "capabilities": [{ "kind": "tasks:provide" }, { "kind": "settings:own" }]
+}

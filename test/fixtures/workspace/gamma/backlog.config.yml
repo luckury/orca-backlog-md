@@ -1,0 +1,3 @@
+project_name: Gamma
+backlog_directory: work/todo
+statuses: [Open, Doing, Blocked, Closed]
